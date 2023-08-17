@@ -23,15 +23,22 @@ const PromptCardList = ({ data, handleTagClick }) => {
 const Feed = () => {
     const [searchText, setSerchText] = useState('')
     const [posts, setPosts] = useState([])
-    const handleSearchChange = (e) => {
+    const [filteredPosts, setFilteredPosts] = useState([])
 
-    }
+    useEffect(()=>{
+        const temp = posts.filter((post)=>{
+            return post.prompt.includes(searchText) || post.tag.includes(searchText)
+        })
+        setFilteredPosts(temp)
+        // console.log(searchText)
+    }, [searchText])
 
     useEffect(() => {
         const fetchPosts = async () => {
             const res = await fetch('/api/prompt')
             const data = await res.json()
             setPosts(data)
+            setFilteredPosts(data)
         }
         fetchPosts()
     }, [])
@@ -43,14 +50,17 @@ const Feed = () => {
                     type="text" 
                     placeholder='Search for a prompt...'
                     value={searchText}
-                    onChange={handleSearchChange}
+                    onChange={(e) => { setSerchText(e.target.value) }}
                     required
                     className='search_input peer'
                 />
             </form>
             <PromptCardList 
-                data={posts}
-                handleTagClick={() => {}}
+                // data={posts}
+                data={filteredPosts}
+                handleTagClick={(tag) => {
+                    setSerchText(tag)
+                }}
             />
         </section>
     )
