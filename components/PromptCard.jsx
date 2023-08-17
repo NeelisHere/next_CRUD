@@ -2,10 +2,18 @@
 import { useState } from "react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
-import { usePathname, useRouter} from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { SolidStar, EditIcon, DeleteIcon, HollowStar, CopyIcon, CheckIcon } from "./Icons"
+
+
 
 const PromptCard = ({ post, handleTagClick, handleEdit, handleDelete }) => {
     const [copied, setCopied] = useState('')
+    const [isBookmarked, setIsBookmarked] = useState(false)
+    const pathName = usePathname()
+    const { data: session } = useSession()
+    const router = useRouter()
+
     const handleCopy = () => {
         setCopied(post.prompt)
         navigator.clipboard.writeText(post.prompt)
@@ -28,22 +36,29 @@ const PromptCard = ({ post, handleTagClick, handleEdit, handleDelete }) => {
                         <p className="text-xs text-gray-600">{post.creator.email}</p>
                     </div>
                 </div>
-                <div className="copy_btn" onClick={handleCopy}>
-                    <Image 
-                        src={
-                            copied === post.prompt?
-                            '/assets/icons/tick.svg':
-                            '/assets/icons/copy.svg'
-                        }
-                        width={12}
-                        height={12}
-                    />
+                <div>
+                    {   
+                        pathName === '/profile'?
+                        (
+                            isBookmarked?
+                            <div onClick={()=>{setIsBookmarked(!isBookmarked)}}><SolidStar /></div>:
+                            <div onClick={()=>{setIsBookmarked(!isBookmarked)}}><HollowStar /></div>
+                        ):
+                        (
+                            <div className="copy_btn" onClick={handleCopy}>
+                                {
+                                    copied === post.prompt ?
+                                    <CheckIcon />:<CopyIcon />
+                                }
+                            </div>
+                        )
+                    }
                 </div>
             </div>
             <p className="my-4 font-satoshi text-sm text-gray-700">{post.prompt}</p>
-            <p 
-                onClick={()=>{
-                    if(handleTagClick){
+            <p
+                onClick={() => {
+                    if (handleTagClick) {
                         handleTagClick(post.tag)
                     }
                 }}
@@ -51,6 +66,24 @@ const PromptCard = ({ post, handleTagClick, handleEdit, handleDelete }) => {
             >
                 {post.tag}
             </p>
+            {
+                session?.user.id === post.creator._id &&
+                pathName === '/profile' &&
+                <div className="flex-center gap-4 itmes-center pt-3">
+                    <div className="copy_btn" onClick={handleCopy}>
+                        {
+                            copied === post.prompt ?
+                            <CheckIcon />:<CopyIcon />
+                        }
+                    </div>
+                    <div onClick={()=>{ handleEdit(post) }}>
+                        <EditIcon />
+                    </div>
+                    <div onClick={()=>{ handleDelete(post) }}>
+                        <DeleteIcon />
+                    </div>
+                </div>
+            }
         </div>
     )
 }
