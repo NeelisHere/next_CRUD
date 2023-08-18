@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation"
 import { SolidStar, EditIcon, DeleteIcon, HollowStar, CopyIcon, CheckIcon } from "./Icons"
 
 
-
 const PromptCard = ({ post, handleTagClick, handleEdit, handleDelete }) => {
     const [copied, setCopied] = useState('')
     const [isBookmarked, setIsBookmarked] = useState(false)
@@ -23,7 +22,17 @@ const PromptCard = ({ post, handleTagClick, handleEdit, handleDelete }) => {
     return (
         <div className="prompt_card">
             <div className="flex justify-between items-start gap-5">
-                <div className="flex-1 flex justify-start items-center gap-3 cursor-pointer">
+                <div 
+                    className="flex-1 flex justify-start items-center gap-3 cursor-pointer"
+                    onClick={()=>{
+                        if(post.creator.email !== session.user.email) {
+                            router.push(`/others-profile/${post.creator._id}`)
+                            // console.log('>>', session.user)
+                        } else {
+                            router.push('/profile')
+                        }
+                    }}
+                >
                     <Image
                         src={post.creator.image}
                         alt="user_image"
