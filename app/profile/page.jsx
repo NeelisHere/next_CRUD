@@ -8,6 +8,7 @@ import Profile from '../../components/Profile'
 
 const MyProfile = () => {
     const [searchText, setSerchText] = useState('')
+    const [showBookmarkedPosts, setShowBookmarkedPosts] = useState(false)
     const [posts, setPosts] = useState([])
     const { data: session } = useSession()
     const router = useRouter()
@@ -33,11 +34,17 @@ const MyProfile = () => {
         const fetchPosts = async () => {
             const res = await fetch(`/api/users/${session?.user.id}/posts`)
             const data = await res.json()
-            setPosts(data)
+            // setPosts(data)
+            if (!showBookmarkedPosts) {
+                setPosts(data)
+            } else {
+                const bookmarkedPosts = data.filter((post)=>post.isBookmarked === true)
+                setPosts(bookmarkedPosts)
+            }
         }
         if(session?.user.id)fetchPosts()
         
-    }, [])
+    }, [showBookmarkedPosts])
 
     return (
         <Profile 
@@ -46,6 +53,8 @@ const MyProfile = () => {
             data={posts}
             handleEdit={handleEdit}
             handleDelete={handleDelete}
+            showBookmarkedPosts={showBookmarkedPosts}
+            setShowBookmarkedPosts={setShowBookmarkedPosts}
         />
     )
 }

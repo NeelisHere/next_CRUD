@@ -1,5 +1,5 @@
 'use client'
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { usePathname, useRouter } from "next/navigation"
@@ -18,6 +18,19 @@ const PromptCard = ({ post, handleTagClick, handleEdit, handleDelete }) => {
         navigator.clipboard.writeText(post.prompt)
         setTimeout(() => setCopied(''), 3000)
     }
+
+    useEffect(()=>{
+        setIsBookmarked(post.isBookmarked)
+    }, [])
+
+    const addToBookmark = async (bookmarkStatus) => {
+        // alert(post._id)
+        await fetch(`/api/prompt/bookmark/${post._id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ bookmarkStatus })
+        })
+    }
+
     // console.log(post)
     return (
         <div className="prompt_card">
@@ -49,10 +62,20 @@ const PromptCard = ({ post, handleTagClick, handleEdit, handleDelete }) => {
                     {   
                         pathName === '/profile'?
                         (
-                            isBookmarked?
-                            <div onClick={()=>{setIsBookmarked(!isBookmarked)}}><SolidStar /></div>:
-                            <div onClick={()=>{setIsBookmarked(!isBookmarked)}}><HollowStar /></div>
-                        ):
+                            // post.isBookmarked?
+                            <div 
+                                onClick={()=>{
+                                    setIsBookmarked((prevBookmarkStatus)=>{
+                                        addToBookmark(!prevBookmarkStatus)
+                                        return !prevBookmarkStatus
+                                    })
+                                    
+                                }}
+                            >
+                                {isBookmarked? <SolidStar /> : <HollowStar />}
+                            </div>
+                        )
+                        :
                         (
                             <div className="copy_btn" onClick={handleCopy}>
                                 {
